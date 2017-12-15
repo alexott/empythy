@@ -1,15 +1,21 @@
 import csv
 import os
+import sys
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.cross_validation import train_test_split
+#from sklearn.cross_validation import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
+import pickle
+
 from empythy import utils
 
-module_path = os.path.dirname(__file__)
+if sys.__stdin__.isatty():
+    module_path = os.path.dirname(sys.argv[0])
+else:
+    module_path = os.path.dirname(__file__)
 
 
 class EmpathyMachines(object):
@@ -19,6 +25,7 @@ class EmpathyMachines(object):
 
 
     def train(self, corpus='Twitter', corpus_array=None, print_analytics_results=False, verbose=True, file_name=None):
+        corpus_name = corpus.lower()
 
         if print_analytics_results:
             verbose = True
@@ -26,18 +33,18 @@ class EmpathyMachines(object):
         if verbose:
             print('Loading the corpus')
 
-        if corpus.lower() == 'custom':
+        if corpus_name == 'custom':
             raw_data = corpus_array
 
-        elif corpus.lower() == 'twitter':
+        elif corpus_name == 'twitter':
             corpus_file_path = os.path.join(module_path, 'corpora', 'aggregatedCorpusCleanedAndFiltered.csv')
             raw_data = utils.load_dataset(corpus_file_path)
 
-        elif corpus.lower() == 'moviereviews':
+        elif corpus_name == 'moviereviews':
             raw_data = utils.load_movie_reviews()
 
         confidence_threshold = None
-        if corpus.lower() == 'twitter':
+        if corpus_name == 'twitter':
             confidence_threshold = 0.3
 
         # This cannot be baked into our pipeline, because we only apply it to our training data, not our predictions data
@@ -76,7 +83,7 @@ class EmpathyMachines(object):
             print('Running the pipeline...')
             print('This means transforming the data and training the model')
 
-        ppl.fit_transform(corpus_strings, sentiments)
+        ppl.fit(corpus_strings, sentiments)
 
         self.trained_pipeline = ppl
 
