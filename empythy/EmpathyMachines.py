@@ -103,6 +103,17 @@ class EmpathyMachines(object):
             print('Finished training!')
 
 
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self.trained_pipeline, f)
+
+    @staticmethod
+    def load(filename):
+        inst = EmpathyMachines()
+        with open(filename, 'rb') as f:
+            inst.trained_pipeline = pickle.load(f)
+        return inst
+
     def predict(self, text):
         try:
             if isinstance(text, basestring):
